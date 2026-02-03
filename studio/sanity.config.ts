@@ -6,16 +6,20 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
+import {colorInput} from '@sanity/color-input'
+import {assist} from '@sanity/assist'
+import {imageHotspotArrayPlugin} from 'sanity-plugin-hotspot-array'
+import {media, mediaAssetSource} from 'sanity-plugin-media'
+
+import {customDocumentActions} from './src/plugins/customDocumentActions'
 import {schemaTypes} from './src/schemaTypes'
 import {structure} from './src/structure'
-import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {
   presentationTool,
   defineDocuments,
   defineLocations,
   type DocumentLocation,
 } from 'sanity/presentation'
-import {assist} from '@sanity/assist'
 
 // Environment variables for project configuration
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'your-projectID'
@@ -47,7 +51,7 @@ function resolveHref(documentType?: string, slug?: string): string | undefined {
 // Main Sanity configuration
 export default defineConfig({
   name: 'default',
-  title: 'Sanity + Next.js Starter Template',
+  title: 'SKO Template',
 
   projectId,
   dataset,
@@ -61,6 +65,7 @@ export default defineConfig({
           enable: '/api/draft-mode/enable',
         },
       },
+      allowOrigins: ['http://localhost:3000'],
       resolve: {
         // The Main Document Resolver API provides a method of resolving a main document from a given route or route pattern. https://www.sanity.io/docs/visual-editing/presentation-resolver-api#57720a5678d9
         mainDocuments: defineDocuments([
@@ -123,10 +128,26 @@ export default defineConfig({
       structure, // Custom studio structure configuration, imported from ./src/structure.ts
     }),
     // Additional plugins for enhanced functionality
-    unsplashImageAsset(),
+    colorInput(),
+    imageHotspotArrayPlugin(),
+    media(),
+    customDocumentActions(),
     assist(),
     visionTool(),
   ],
+
+  form: {
+    file: {
+      assetSources: (previousAssetSources) => {
+        return previousAssetSources.filter((assetSource) => assetSource !== mediaAssetSource)
+      },
+    },
+    image: {
+      assetSources: (previousAssetSources) => {
+        return previousAssetSources.filter((assetSource) => assetSource === mediaAssetSource)
+      },
+    },
+  },
 
   // Schema configuration, imported from ./src/schemaTypes/index.ts
   schema: {

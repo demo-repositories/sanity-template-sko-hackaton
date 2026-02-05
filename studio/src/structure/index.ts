@@ -1,29 +1,69 @@
-import {CogIcon} from '@sanity/icons'
-import type {StructureBuilder, StructureResolver} from 'sanity/structure'
-import pluralize from 'pluralize-esm'
+import {ListItemBuilder, StructureResolver} from 'sanity/structure';
+import collections from './collectionStructure'
+import colorThemes from './colorThemeStructure'
+import home from './homeStructure'
+import pages from './pageStructure'
+import posts, { marketingCampaigns } from './postStructure'
+import products from './productStructure'
+import settings from './settingStructure'
+import notifications from './notificationStructure'
 
 /**
- * Structure builder is useful whenever you want to control how documents are grouped and
- * listed in the studio or for adding additional in-studio previews or content to documents.
- * Learn more: https://www.sanity.io/docs/structure-builder-introduction
+ * Structure overrides
+ *
+ * Sanity Studio automatically lists document types out of the box.
+ * With this custom structure we achieve things like showing the `home`
+ * and `settings` document types as singletons, and grouping product details
+ * and variants for easy editorial access.
+ *
+ * You can customize this even further as your schema types progress.
+ * To learn more about structure builder, visit our docs:
+ * https://www.sanity.io/docs/overview-structure-builder
  */
 
-const DISABLED_TYPES = ['settings', 'assist.instruction.context']
+// If you add document types to structure manually, you can add them to this function to prevent duplicates in the root pane
+const hiddenDocTypes = (listItem: ListItemBuilder) => {
+  const id = listItem.getId()
 
-export const structure: StructureResolver = (S: StructureBuilder) =>
+  if (!id) {
+    return false
+  }
+
+  return ![
+    'collection',
+    'colorTheme',
+    'home',
+    'media.tag',
+    'page',
+    'post',
+    'product',
+    'colorVariant',
+    'productMap',
+    'productVariant',
+    'settings',
+    'marketingCampaign',
+    'notification',
+  ].includes(id)
+}
+
+export const structure: StructureResolver = (S, context) =>
   S.list()
-    .title('Website Content')
+    .title('Content')
     .items([
-      ...S.documentTypeListItems()
-        // Remove the "assist.instruction.context" and "settings" content  from the list of content types
-        .filter((listItem: any) => !DISABLED_TYPES.includes(listItem.getId()))
-        // Pluralize the title of each document type.  This is not required but just an option to consider.
-        .map((listItem) => {
-          return listItem.title(pluralize(listItem.getTitle() as string))
-        }),
-      // Settings Singleton in order to view/edit the one particular document for Settings.  Learn more about Singletons: https://www.sanity.io/docs/create-a-link-to-a-single-edit-page-in-your-main-document-type-list
-      S.listItem()
-        .title('Site Settings')
-        .child(S.document().schemaType('settings').documentId('siteSettings'))
-        .icon(CogIcon),
+      home(S, context),
+      pages(S, context),
+      S.divider(),
+      posts(S, context),
+      marketingCampaigns(S, context),
+      S.divider(),
+      collections(S, context),
+      products(S, context),
+      S.divider(),
+      colorThemes(S, context),
+      S.divider(),
+      notifications(S, context),
+      S.divider(),
+      settings(S, context),
+      S.divider(),
+      ...S.documentTypeListItems().filter(hiddenDocTypes),
     ])

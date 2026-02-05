@@ -30,7 +30,7 @@ Run the command in your Terminal to initialize this template on your local compu
 See the documentation if you are [having issues with the CLI](https://www.sanity.io/help/cli-errors).
 
 ```shell
-npm create sanity@latest -- --template demo-repositories/sanity-template-sko-hackaton
+npm create sanity@latest -- --template sanity-io/sanity-template-nextjs-clean
 ```
 
 #### 2. Run Studio and Next.js app locally
@@ -49,15 +49,7 @@ Open the Studio running locally in your browser on [http://localhost:3333](http:
 
 ### Adding content with Sanity
 
-#### 1. Publish your first document
-
-The template comes pre-defined with a schema containing `Page`, `Post`, `Person`, and `Settings` document types.
-
-From the Studio, click "+ Create" and select the `Post` document type. Go ahead and create and publish the document.
-
-Your content should now appear in your Next.js app ([http://localhost:3000](http://localhost:3000)) as well as in the Studio on the "Presentation" Tab
-
-#### 2. Import Sample Data (optional)
+#### 1. Import Sample Data
 
 You may want to start with some sample content and we've got you covered. Run this command from the root of your project to import the provided dataset (sample-data.tar.gz) into your Sanity project. This step is optional but can be helpful for getting started quickly.
 
@@ -65,9 +57,7 @@ You may want to start with some sample content and we've got you covered. Run th
 npm run import-sample-data
 ```
 
-#### 3. Extending the Sanity schema
-
-The schema for the `Post` document type is defined in the `studio/src/schemaTypes/post.ts` file. You can [add more document types](https://www.sanity.io/docs/studio/schema-types) to the schema to suit your needs.
+Overwrite the production dataset. 
 
 ### Deploying your application and inviting editors
 

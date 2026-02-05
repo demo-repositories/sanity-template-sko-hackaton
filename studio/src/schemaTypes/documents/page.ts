@@ -1,62 +1,87 @@
-import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
+import {defineField, defineArrayMember, defineType} from 'sanity'
 
-/**
- * Page schema.  Define and edit the fields for the 'page' content type.
- * Learn more: https://www.sanity.io/docs/studio/schema-types
- */
+import {validateSlug} from '../../utils/validateSlug'
+import { GROUPS } from '../../constants'
 
-export const page = defineType({
+export const pageType = defineType({
   name: 'page',
   title: 'Page',
   type: 'document',
   icon: DocumentIcon,
+  groups: GROUPS,
   fields: [
     defineField({
-      name: 'name',
-      title: 'Name',
+      name: 'title',
+      group: 'editorial',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      description: 'Page title that appears in the browser tab and search results',
+      validation: (Rule) => [
+        Rule.required().error('Page title is required'),
+        Rule.max(60).warning('Consider keeping titles under 60 characters for SEO'),
+      ],
+    }),
+    defineField({
+      name: 'slug',
+      group: 'editorial',
+      type: 'slug',
+      options: {source: 'title'},
+      description: 'URL-friendly version of the title (auto-generated from title)',
+      validation: validateSlug,
+    }),
+    defineField({
+      name: 'publishedAt',
+      type: 'datetime',
+      readOnly: true,
+      group: 'editorial',
+    }),
+    defineField({
+      name: 'colorTheme',
+      type: 'array',
+      of: [defineArrayMember({type: 'reference', to: {type: 'colorTheme'}})],
+      description: 'Color theme for this page',
+      group: 'theme',
+      validation: (Rule) => Rule.max(1).warning('Only one color theme can be selected'),
+    }),
+    defineField({
+      name: 'hero',
+      type: 'hero',
+      hidden: ({document}) => !document?.showHero,
+      group: 'editorial',
     }),
 
     defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      validation: (Rule) => Rule.required(),
-      options: {
-        source: 'name',
-        maxLength: 96,
-      },
-    }),
-    defineField({
-      name: 'heading',
-      title: 'Heading',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'subheading',
-      title: 'Subheading',
-      type: 'string',
-    }),
-    defineField({
-      name: 'pageBuilder',
-      title: 'Page builder',
+      name: 'modules',
       type: 'array',
-      of: [{type: 'callToAction'}, {type: 'infoSection'}],
-      options: {
-        insertMenu: {
-          // Configure the "Add Item" menu to display a thumbnail preview of the content type. https://www.sanity.io/docs/studio/array-type#efb1fe03459d
-          views: [
-            {
-              name: 'grid',
-              previewImageUrl: (schemaTypeName) =>
-                `/static/page-builder-thumbnails/${schemaTypeName}.webp`,
-            },
-          ],
-        },
-      },
+      of: [
+        defineArrayMember({ type: 'informationHero' }),
+        defineArrayMember({ type: 'logoGrid' }),
+        defineArrayMember({ type: 'techInformation' }),
+        defineArrayMember({ type: 'collaborators' }),
+        defineArrayMember({ type: 'faqs' }),
+        defineArrayMember({ type: 'careers' }),
+        defineArrayMember({ type: 'customTable' }),
+      ],
+      group: 'editorial',
     }),
+
+    defineField({
+      name: 'seo',
+      title: 'SEO',
+      type: 'seo',
+      group: 'seo',
+    })
   ],
+  preview: {
+    select: {
+      seoImage: 'seo.image',
+      title: 'title',
+    },
+    prepare({seoImage, title}) {
+      return {
+        media: seoImage ?? DocumentIcon,
+        title,
+      }
+    },
+  },
 })

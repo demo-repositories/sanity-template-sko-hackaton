@@ -1,94 +1,152 @@
-# Clean Next.js + Sanity app
+# Sanity SKO Hackathon - Swag Store Template
 
-This template includes a [Next.js](https://nextjs.org/) app with a [Sanity Studio](https://www.sanity.io/) – an open-source React application that connects to your Sanity project’s hosted dataset. The Studio is configured locally and can then be deployed for content collaboration.
+A production-ready e-commerce template with Sanity Studio and Next.js frontend.
 
-![Screenshot of Sanity Studio using Presentation Tool to do Visual Editing](/sanity-next-preview.png)
+## Quick Start
 
-## Features
-
-- **Next.js 16 for Performance:** Leverage the power of Next.js 16 App Router for blazing-fast performance and SEO-friendly static sites.
-- **Real-time Visual Editing:** Edit content live with Sanity's [Presentation Tool](https://www.sanity.io/docs/presentation) and see updates in real time.
-- **Live Content:** The [Live Content API](https://www.sanity.io/live) allows you to deliver live, dynamic experiences to your users without the complexity and scalability challenges that typically come with building real-time functionality.
-- **Customizable Pages with Drag-and-Drop:** Create and manage pages using a page builder with dynamic components and [Drag-and-Drop Visual Editing](https://www.sanity.io/visual-editing-for-structured-content).
-- **Powerful Content Management:** Collaborate with team members in real-time, with fine-grained revision history.
-- **AI-powered Media Support:** Auto-generate alt text with [Sanity AI Assist](https://www.sanity.io/ai-assist).
-- **On-demand Publishing:** No waiting for rebuilds—new content is live instantly with Incremental Static Revalidation.
-- **Easy Media Management:** [Integrated Unsplash support](https://www.sanity.io/plugins/sanity-plugin-asset-source-unsplash) for seamless media handling.
-
-## Demo
-
-https://template-nextjs-clean.sanity.dev
-
-## Getting Started
-
-### Installing the template
-
-#### 1. Initialize template with Sanity CLI
-
-Run the command in your Terminal to initialize this template on your local computer.
-
-See the documentation if you are [having issues with the CLI](https://www.sanity.io/help/cli-errors).
-
-```shell
-npm create sanity@latest -- --template sanity-io/sanity-template-nextjs-clean
+### Initialize from Template
+```bash
+npm create sanity@latest -- --template demo-repositories/sanity-template-sko-hackaton
 ```
 
-#### 2. Run Studio and Next.js app locally
+You'll be prompted for:
+- **Project name:** Choose something unique
+- **Organization:** Select "SKO Hackathon" 
+- **Dataset:** Use "production"
+- **Output path:** Press enter for current directory
 
-Navigate to the template directory using `cd <your app name>`, and start the development servers by running the following command
-
-```shell
-npm run dev
+### Deploy Studio
+```bash
+cd your-project-name/studio
+pnpm install
+sanity deploy
 ```
 
-#### 3. Open the app and sign in to the Studio
+Choose a unique studio hostname (e.g., `your-name-swag-sko`)
 
-Open the Next.js app running locally in your browser on [http://localhost:3000](http://localhost:3000).
-
-Open the Studio running locally in your browser on [http://localhost:3333](http://localhost:3333). You should now see a screen prompting you to log in to the Studio. Use the same service (Google, GitHub, or email) that you used when you logged in to the CLI.
-
-### Adding content with Sanity
-
-#### 1. Import Sample Data
-
-You may want to start with some sample content and we've got you covered. Run this command from the root of your project to import the provided dataset (sample-data.tar.gz) into your Sanity project. This step is optional but can be helpful for getting started quickly.
-
-```shell
-npm run import-sample-data
+### Import Product Data
+```bash
+# In /studio directory
+sanity dataset import /path/to/products.tar.gz production
 ```
 
-Overwrite the production dataset. 
+### Launch Frontend
+```bash
+cd ../frontend
+pnpm install
 
-### Deploying your application and inviting editors
+# Copy and configure environment variables
+cp .env.local.example .env.local
+# Edit .env.local with your project ID (found in studio/sanity.config.ts)
 
-#### 1. Deploy Sanity Studio
-
-Your Next.js frontend (`/frontend`) and Sanity Studio (`/studio`) are still only running on your local computer. It's time to deploy and get it into the hands of other content editors.
-
-Back in your Studio directory (`/studio`), run the following command to deploy your Sanity Studio.
-
-```shell
-npx sanity deploy
+# Start dev server
+pnpm dev
 ```
 
-#### 2. Deploy Next.js app to Vercel
+Visit `http://localhost:3000`
 
-You have the freedom to deploy your Next.js app to your hosting provider of choice. With Vercel and GitHub being a popular choice, we'll cover the basics of that approach.
+## Project Structure
+```
+sanity-template-sko-hackaton/
+├── studio/                      # Sanity Studio
+│   └── schemaTypes/
+│       ├── documents/           # Main document types
+│       │   ├── product.tsx     # Product schema
+│       │   ├── category.tsx
+│       │   ├── collection.tsx
+│       │   └── ...
+│       ├── objects/            # Reusable objects
+│       └── singletons/         # Site settings
+│
+└── frontend/                    # Next.js app
+    ├── app/                    # App router
+    └── lib/                    # Sanity client
+```
 
-1. Create a GitHub repository from this project. [Learn more](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github).
-2. Create a new Vercel project and connect it to your Github repository.
-3. Set the `Root Directory` to your Next.js app.
-4. Configure your Environment Variables.
+## Customizing the Product Schema
 
-#### 3. Invite a collaborator
+To add a custom field to products, edit `studio/schemaTypes/documents/product.tsx`:
+```typescript
+// Find the fields array and add your field:
+{
+  name: 'yourFieldName',
+  type: 'boolean', // or 'string', 'number', etc.
+  title: 'Your Field Title',
+  description: 'What this field does'
+}
+```
 
-Now that you’ve deployed your Next.js application and Sanity Studio, you can optionally invite a collaborator to your Studio. Open up [Manage](https://www.sanity.io/manage), select your project and click "Invite project members"
+### Custom Field Ideas
 
-They will be able to access the deployed Studio, where you can collaborate together on creating content.
+- `featured: boolean` - Mark products to highlight on homepage
+- `staffPick: boolean` - Designate team favorites
+- `inStock: boolean` - Track availability
+- `material: string` - Product material description
+- `sustainabilityScore: number` - Rate eco-friendliness (0-10)
+- `comingSoon: boolean` - Mark upcoming products
+- `limitedEdition: boolean` - Special release items
+- `difficulty: string` - For technical products (beginner/advanced)
 
-## Resources
+After adding fields, redeploy your studio:
+```bash
+sanity deploy
+```
 
-- [Sanity documentation](https://www.sanity.io/docs)
-- [Next.js documentation](https://nextjs.org/docs)
-- [Join the Sanity Community](https://slack.sanity.io)
-- [Learn Sanity](https://www.sanity.io/learn)
+## What's Included
+
+### Core Schemas
+- Product with variants, pricing, images
+- Categories and collections
+- Color themes and variants
+- Homepage and page builder
+- Blog posts
+
+### Supporting Objects
+- Custom product options (colors, sizes)
+- Product features and hotspots
+- Page builder modules (heroes, grids, CTAs, etc.)
+- Navigation and footer configuration
+- Shopify integration objects
+- SEO settings
+
+## Troubleshooting
+
+**"Command not found: sanity"**
+```bash
+pnpm install -g @sanity/cli
+```
+
+**Authentication issues**
+```bash
+sanity logout
+sanity login
+```
+
+**Find your project ID**
+```bash
+# In /studio directory
+cat sanity.config.ts | grep projectId
+```
+
+**Port 3000 in use**
+```bash
+pnpm dev -- -p 3001
+```
+
+## Documentation
+
+- [Sanity Schema Types](https://www.sanity.io/docs/schema-types)
+- [GROQ Queries](https://www.sanity.io/docs/groq)
+- [Next.js App Router](https://nextjs.org/docs)
+- [Sanity + Next.js](https://www.sanity.io/plugins/next-sanity)
+
+## Prerequisites
+
+- Node.js v20 or higher
+- pnpm (`npm install -g pnpm`)
+- Sanity CLI (`pnpm install -g @sanity/cli`)
+- Authenticated with Sanity (`sanity login`)
+
+---
+
+Built for Sanity SKO 2026
